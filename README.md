@@ -28,7 +28,7 @@ despike 0.1.0
 
 # How to use 
 ## Data preparation
-Flaten the MSI data sets as input data, assuming you have already done peak picking, alignment, normalization, denoise, etc. 2D spatial indexes are kept in first two columns. A sample mouse kidney section data set is provided in example foler.
+Flaten the MSI data sets as input data, assuming you have already done peak picking, alignment, normalization, denoise, etc. 2D spatial indexes are kept in first two columns. A sample mouse kidney section data set is provided in the example foler. Note: it does not include the complete m/z channels as the paper described becaused of the Github file size limit.
 <div align="center">
 <img src="images/image3.png" width="600">
 </div>
