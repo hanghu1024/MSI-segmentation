@@ -31,7 +31,7 @@ despike 0.1.0
 Flatten the MSI image sets as input data. 2D spatial indexes are kept in first two columns. 
 
 ## Main programs
-Run MSI-segmentation_LX modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. 
+Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. 
 
 *MSI-segmentation_L0.py*<br>
 Show ion images, reduce the dimensionality of MSI data by PCA and UMAP. 
