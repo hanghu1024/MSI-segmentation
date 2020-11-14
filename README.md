@@ -8,7 +8,7 @@ The pipeline comprises four independent data processing modules, as illustrated 
 <img src="images/image1.png" width="400">
 </div>
 
-Herein we limit the user effort to validation and selection of segment candidates. Computational results are exported in forms of .csv and .png. Results are also visualized by Tkinter interactive interface. You may set parameters and select segment candidates by editing config.py. Representative results of a mouse kidney section data set (included in example) are as follows. 
+Herein we limit the user effort to validation and selection of segment candidates. Computational results are exported in forms of .csv and .png. Results are also visualized by Tkinter interactive interface. You may set parameters and select segment candidates by editing config.py. Representative analysis results of a mouse kidney section data set (included in example) are as follows. 
 
 <div align="center">
 <img src="images/image2.png" width="600">
