@@ -30,13 +30,13 @@ despike 0.1.0
 
 # How to use 
 ## Data preparation
-Flaten the MSI data sets as input data, assuming you have already done peak picking, alignment, normalization, denoise, etc. 2D spatial indexes are kept in first two columns. A sample mouse kidney section data set is provided in the example foler. Note: it does not include the complete m/z channels as the paper described becaused of the Github file size limit.
+Two data preparation strategies are used: 1. peak picking for PCA analysis. 2. peak detection + m/z binning for UMAP analysis. After pixel alignment, peak intensity normalization, denoise, etc, flaten the MSI data sets as input data. 2D spatial indexes are kept in first two columns. A sample mouse kidney section data set is provided in the example foler.
 <div align="center">
 <img src="images/image3.png" width="600">
 </div>
 
 ## Main programs
-Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. <br>To test the mouse kidney MSI sample, clone repository and run MSI-segmentation_L0.py. Note only partial peak intensities are included in the sample data, because of the upload limit. Analysis results may be slightly different from the manuscript.
+Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. <br>To test the mouse kidney MSI sample, clone repository and run MSI-segmentation_L0.py. Note: only partial peak intensities are included in the sample data, because of the upload limit. Analysis results may be slightly different from the manuscript.
 
 *MSI-segmentation_L0.py*<br>
 Show ion images, reduce the dimensionality of MSI data by PCA and UMAP. 
