@@ -21,9 +21,11 @@ pandas 1.1.0
 matplotlib 3.1.3
 mplcursors 0.3
 tkinter 8.6
+scipy 1.4.1
 scikit-learn 0.22.1
 scikit-image 0.16.2
 umap-learn 0.3.10
+hdbscan 0.8.26
 despike 0.1.0
 
 # How to use 
@@ -35,6 +37,7 @@ Flaten the MSI data sets as input data, assuming you have already done peak pick
 
 ## Main programs
 Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. 
+To test the mouse kidney MSI sample, clone repository and run MSI-segmentation_L0.py. Note only partial peak intensities are included in the sample data, because of the upload limit. Analysis results may be slightly different from the manuscript.
 
 *MSI-segmentation_L0.py*<br>
 Show ion images, reduce the dimensionality of MSI data by PCA and UMAP. 
@@ -45,16 +48,22 @@ Multivariate clustering by Gaussian mixture model.
 *MSI-segmentation_L1.1.py (validation)*<br>
 Show clustering results by interactive tkinter interface. 
 
+MSI-segmentation_L1.2.py 
+Detect ion images which are not captured by PCA analysis. A ward's hierarchical clustering method is used to cluster ion distribution patterns.
+
 *MSI-segmentation_L2.0.py*<br>
 Univariate thresholding by multi-Otsu thresholding algorithm.
 
 *MSI-segmentation_L2.1.py (selection)*<br>
 Binarization of selected ion images with selected thresholding labels. 
 
-*MSI-segmentation_L3.0.py (validation)*<br>
+*MSI-segmentation_L3.0.py *<br>
+Auto-finish the clustering analysis with a co-occurrence majority vote method. Compuation could be expensive for large size MSI data.
+
+*MSI-segmentation_L3.1.py (validation)*<br>
 Show ensemble segment candidates by interactive tkinter interface. 
 
-*MSI-segmentation_L3.1.py (selection)*<br>
-Assemble the final segmentation map. 
+*MSI-segmentation_L3.2.py (selection)*<br>
+Simplify the auto-assembled segmentation map or manually assemble the final segmentation map.
 
 
