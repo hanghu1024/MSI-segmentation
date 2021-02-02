@@ -69,7 +69,7 @@ print('Finish co-occurrence matrix construction, next step: L3.0.3 Truncated SVD
 #===========================================
 StaTime = time.time()
 
-svd = TruncatedSVD(n_components = 51)
+svd = TruncatedSVD(n_components = 51)   # n_iter = 10 may help, but computation gets more expensive
 pcs_all = svd.fit_transform(co_matrix)
 
 SpenTime = time.time() - StaTime
@@ -132,7 +132,7 @@ print('Finish TruncatedSVD, next step: L3.0.4 GMM batching')
 StaTime = time.time()
 
 n_batches = 1000
-gmm = GMM(n_components=n_batches)
+gmm = GMM(n_components=n_batches)    # max_iter = 1000 may help, but computation gets more expensive
 labels = gmm.fit_predict(pcs_all[:, :nPCs])
 
 SpenTime = time.time() - StaTime
