@@ -13,7 +13,7 @@ Herein we limit the user effort to validation and selection of segment candidate
 <div align="center">
 <img src="images/analysis_results.png" width="600">
 </div>
-Ion image generated from peak intensities (A), UMAP + HDBSCAN analysis (B) and PCA scree plot (C) produced by L0 module. (D) Outlier ion image detection by ward's hierarchical clustering and PCA loading analysis. (E) ion image thresholding analysis. (F) Automatically assemble the ensemble clustering results by a co-occurrence majority vote method. (G) Ensemble segment candidates and auto-assembled segmentation map. (H) A simplified map to highlight kidney anatomical regions.
+Ion image generated from peak intensities (A), UMAP + HDBSCAN analysis (B) and PCA scree plot (C) produced by L0 module. (D) Outlier ion image detection by ward's hierarchical clustering and PCA loading analysis. (E) Ion image thresholding analysis. (F) Automatically assemble the ensemble clustering results by a co-occurrence majority vote method. (G) Ensemble segment candidates and auto-assembled segmentation map. (H) A simplified map to highlight kidney anatomical regions.
 
 # Requirements
 numpy 1.18.1
@@ -36,7 +36,7 @@ Two data preparation strategies are used: 1. peak picking for PCA analysis. 2. p
 </div>
 
 ## Main programs
-Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. <br>To test the mouse kidney MSI sample, clone repository and run MSI-segmentation_L0.py. Note: only partial peak intensities are included in the sample data, because of the upload limit. Analysis results may be slightly different from the manuscript.
+Run *MSI-segmentation_LX* modules sequentially, outputs of one module may be the input for the following module. Edit corresponding levels in config.py along the pipeline. <br>To test the mouse kidney MSI sample, clone repository and run MSI-segmentation_L0.py. Note: only partial peak intensities are included in the sample data, because of the upload limit. Analysis results are slightly different from the manuscript.
 
 *MSI-segmentation_L0.py*<br>
 Show ion images, reduce the dimensionality of MSI data by PCA and UMAP. 
