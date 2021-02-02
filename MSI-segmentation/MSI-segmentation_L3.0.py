@@ -8,126 +8,235 @@ exec(open("./config.py").read())
 print('Finish modules, defs and variables import')
 
 #===========================================
-# import data 
+# L3.0.0 import data 
 #===========================================
-df_pixel_label = pd.read_csv(EnOutputDir)
+# L1 output GMM
+df_pixel_label_clustering = pd.read_csv(L1outputDir)
+# L2 output ensemble segments
+df_pixel_label_ensemble = pd.read_csv(EnOutputDir)
 
-print('Finish pixel raw data import')
+print('Finish pixel raw data import, next step: L3.0.1 raw data process')
 
 #===========================================
-# L3.1 data process
+# L3.0.1 raw data process
 #===========================================
-pixel_label = df_pixel_label.values.astype(int)
+# 1. populate results in ensamble results folder
+OutputFolder = locate_OutputFolder4(EnOutputDir)
 
-# parse dimension
-NumLine = np.max(pixel_label[:,0])+1
-NumSpePerLine = np.max(pixel_label[:,1])+1
-# parameter for plotting
+# 2. parse dimension
+NumLine = np.max(df_pixel_label_clustering.iloc[:,0])+1
+NumSpePerLine = np.max(df_pixel_label_clustering.iloc[:,1])+1
+
+# 4. parameter for plotting
 aspect = AspectRatio*NumSpePerLine/NumLine
-# relabel pixels
 
-# organize img
-img = pixel_label.T.reshape(pixel_label.shape[1], NumLine, NumSpePerLine)
+# 5. get clustering labels
+pixel_label = df_pixel_label_clustering.values.astype(np.int64)[:,2:]
+n_clusters = pixel_label.shape[1]
+pixel_seg_maps = pixel_label.T.reshape(n_clusters, NumLine, NumSpePerLine)
 
-# make folders for multivariate analysis
-OutputFolder = locate_OutputFolder2(EnOutputDir)
-OutputFolder = locate_OutputFolder3(OutputFolder, 'final segmentation')
-os.mkdir(OutputFolder)
-
-print('Finish L3.1 data process')
+print('Finish raw data processing, next step: L3.0.2 construct co-occurrence matrix')
 
 #===========================================
-# L3.1 ensemble results in mosaic plot, save images 
+# L3.0.2 construct co-occurrence matrix
 #===========================================
-# mosaic img show
-# parameters:
-w_fig = 20 # default setting
-ncols = ncols_L1
-nrows = math.ceil((img.shape[0]-2)/ncols)
-h_fig = w_fig * nrows * (AspectRatio + 0.16) / ncols # 0.2 is the space for title parameters
-columns = df_pixel_label.columns.values
+dim = pixel_label.shape[0]
+co_matrix = np.zeros((dim, dim), dtype=np.uint8)
 
-fig = plt.figure(figsize=(w_fig, h_fig))
-fig.subplots_adjust(hspace= 0, wspace=0.01, right=0.95)
-for i in range(1, img.shape[0]-1):
-    ax = fig.add_subplot(nrows, ncols, i)
-    im = ax.imshow(img[i+1], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    
-    # title
-    title = columns[i+1]
-    ax.set_title(title, pad=8, fontsize = 15)
+for k in range(pixel_label.shape[1]):
+    label = pixel_label[:,k]
+    # count time
+    StaTime = time.time()
 
-# colorbar
-cbar_ax = fig.add_axes([0.96,0.1,0.01,0.8])
-cbar = fig.colorbar(im, cax=cbar_ax, ticks=[0.5,1.4,2.3,3.3,4.3,5.1,6.2,7,8.1,9,10,10.9,11.8,12.7,13.6,14.7,15.6,16.6,17.5,18.5])
-cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]) #hard code 
-cbar.ax.tick_params(labelsize=10)
+    clusterid_list = np.unique(label)
+    for clusterid in clusterid_list:
+        itemidx = np.where(label == clusterid)
+        for i, x in enumerate(itemidx[0][0: -1]):
+            ys = itemidx[0][i+1:]    # improve performance a lot by only vecterizing this 
+            co_matrix[x, ys] += 1
+            co_matrix[ys, x] += 1
 
-SaveDir = OutputFolder + '\\ensemble_result_plot.png'
-plt.savefig(SaveDir, dpi=dpi)
+    SpenTime = time.time() - StaTime
+    print('running time for {}th label: {}'.format(k, round(SpenTime, 2)))
+
+print('converting to sparse matrix...')
+co_matrix = sparse.coo_matrix(co_matrix)
+print('Finish co-occurrence matrix construction, next step: L3.0.3 Truncated SVD dimensionality reduction')
+
+#===========================================
+# L3.0.3 Truncated SVD dimensionality reduction
+# could run for several mins
+#===========================================
+StaTime = time.time()
+
+svd = TruncatedSVD(n_components = 51)
+pcs_all = svd.fit_transform(co_matrix)
+
+SpenTime = time.time() - StaTime
+print('running time for TruncatedSVD: {}'.format(round(SpenTime, 2)))
+
+# calculate evr
+pca_range = np.arange(1, 51, 1)
+evr = svd.explained_variance_ratio_
+evr_cumsum = np.cumsum(evr)
+
+cut_evr = find_nearest(evr_cumsum, SVD_threshold)
+nPCs = np.where(evr_cumsum == cut_evr)[0][0] + 1
+if nPCs >= 50: # 2 conditions to choose nPCs.
+    nPCs = 50
+
+df_pixel_rep = pd.DataFrame(data = pcs_all[:,0:nPCs], columns= ['PC_%d' % (i+1) for i in range(nPCs)])
+
+print('all done')
+
+
+# scree plot
+### save ion images main code
+fig, ax = plt.subplots(figsize=(20,8))
+ax.bar(pca_range[0:MaxPCs], evr[0:MaxPCs]*100, color="steelblue")
+ax.set_xlabel('Principal component number', fontsize = 30)
+ax.set_ylabel('Percentage of \nvariance explained', fontsize = 30)
+ax.set_ylim([-0.5,100])
+ax.set_xlim([-0.5,50.5])
+
+ax2 = ax.twinx()
+ax2.plot(pca_range[0:MaxPCs], evr_cumsum[0:MaxPCs]*100, color="tomato", marker="D", ms=7)
+ax2.scatter(nPCs, cut_evr*100, marker='*', s = 500, facecolor = 'blue')
+ax2.set_ylabel('Cumulative percentage', fontsize = 30)
+ax2.set_ylim([-0.5,100])
+
+# axis and tick theme
+ax.tick_params(axis="y", colors="steelblue")
+ax2.tick_params(axis="y", colors="tomato")
+ax.tick_params(size=10, color='black', labelsize=25)
+ax2.tick_params(size=10, color='black', labelsize=25)
+
+ax.tick_params(width=3)
+ax2.tick_params(width=3)
+
+ax=plt.gca() # Get the current Axes instance
+
+for axis in ['top','bottom','left','right']:
+    ax.spines[axis].set_linewidth(3)
+
+SaveDir = OutputFolder + '\\PCA_scree_plot.png'
+plt.savefig(SaveDir) 
 plt.close()
 
-print('Finish L3.1 ensemble result plotting, next step: interactive visualization')
+print('Finish TruncatedSVD, next step: L3.0.4 GMM batching')
 
 #===========================================
-# L3.1 ensemble results embed in tk.
+# L3.0.4 GMM batching
+# this step still quite expensive... 
 #===========================================
-# mosaic img show
-# parameters for plt.plot:
-w_fig = 20 # default setting
-ncols = ncols_L3
-nrows = math.ceil((img.shape[0]-2)/ncols)
-h_fig = w_fig * nrows * (AspectRatio + 0.16) / ncols # 0.2 is the space for title parameters
-columns = df_pixel_label.columns.values
-# parameters for tk window
-canvas_width = canvas_width
+StaTime = time.time()
 
-# initiate tk
-root = tk.Tk()
-root.title('ensemble clustering result')
-frame = tk.Frame(root) 
-frame.pack(expand = True, fill = tk.BOTH) 
+n_batches = 1000
+gmm = GMM(n_components=n_batches)
+labels = gmm.fit_predict(pcs_all[:, :nPCs])
 
-fig = mtl.figure.Figure(figsize=(w_fig, h_fig))
-fig.subplots_adjust(hspace= 0, wspace=0.01, right=0.95)
-for i in range(img.shape[0]-2):
-    ax = fig.add_subplot(nrows, ncols, i+1)
-    im = ax.imshow(img[i+2], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19)
-    ax.set_xticks([])
-    ax.set_yticks([])
+SpenTime = time.time() - StaTime
+print('running time for GMM: {}'.format(round(SpenTime, 2)))
+print('next step: L3.0.5 hierarchical clustering')
+
+#===========================================
+# L3.0.5 HC
+#===========================================
+# 1.1 organize the average data for each batch
+elements, counts = np.unique(labels, return_counts=True)
+
+features = []
+
+for label in elements:
+    idx = np.where(labels == label)
+    feature = np.mean(pcs_all[:, :nPCs][idx[0], :], axis=0)
+    features.append(feature)
     
-    # title
-    title = columns[i+2]    # first 2 columns are spatial index
-    ax.set_title(title, pad=5, fontsize = 10)
+features = np.array(features)
 
-# colorbar
-cbar_ax = fig.add_axes([0.96,0.1,0.01,0.8])
-cbar = fig.colorbar(im, cax=cbar_ax, ticks=[0.5,1.4,2.3,3.3,4.3,5.1,6.2,7,8.1,9,10,10.9,11.8,12.7,13.6,14.7,15.6,16.6,17.5,18.5])
-cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]) #hard code 
-cbar.ax.tick_params(labelsize= 10)
+# 1.2 HC sort average batch features
+Y = sch.linkage(features, method = 'average', metric='cosine')
+Z = sch.dendrogram(Y, no_plot = True)
+HC_idx = Z['leaves']
+HC_idx = np.array(HC_idx)
 
-# add cursor
-cursor = mplcursors.cursor(fig, hover=True)
+# 1.3 combine HC indices with GMM batches
+co_matrix_idx = []
 
-# scrollbars
-vbar=tk.Scrollbar(frame,orient=tk.VERTICAL)
+for i in HC_idx:
+    label = elements[i]
+    idx = np.where(labels == label)[0].tolist()
+    co_matrix_idx.extend(idx)
+    
+co_matrix_idx = np.array(co_matrix_idx)
 
-# embed and configurate the canvas
-canvas=FigureCanvasTkAgg(fig, master=frame)
-canvas.get_tk_widget().config(bg='#FFFFFF',scrollregion=(0,0,0,(canvas_width+200)/ncols*nrows))  # these 2 are keys, one defines the region your scroll can reach
-canvas.get_tk_widget().config(width=canvas_width,height=canvas_width/ncols*nrows)                    # one defines the size canvas can show.(this is like root geometry I previously set, width is more important)
-canvas.get_tk_widget().config(yscrollcommand=vbar.set)                 # makes the scroll region setting solid
-canvas.get_tk_widget().grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S) # organize the geometry
+print('finishing HC, plotting the sorted co-occurrence matrix')
 
-# add cursor
-cursor = mplcursors.cursor(fig, hover=True)
+### sort and visualize comatrix with it, expensive...
+co_matrix_sorted = co_matrix[co_matrix_idx, :]
+co_matrix_sorted = co_matrix_sorted[:, co_matrix_idx]
+co_matrix_sorted_small = cv2.resize(co_matrix_sorted, (5000, 5000))
 
-vbar.grid(row=0, column=1, sticky=tk.N+tk.S)
-vbar.config(command=canvas.get_tk_widget().yview)  # this makes scrollbar work
+## plot sorted co-occurrence matrix
+fig=plt.figure(figsize=(10,10))
 
-frame.rowconfigure( 0, weight=1 )     # You need to add this. 
-frame.columnconfigure( 0, weight=1 )
+# plot the heatmap
+axmatrix = fig.add_axes([0.10,0,0.80,0.80])
+im = axmatrix.matshow(co_matrix_sorted_small, aspect='auto', origin='lower', cmap=cm.YlGnBu, interpolation='none')
+fig.gca().invert_yaxis()
 
-tk.mainloop()
+# Plot colorbar
+axcolor = fig.add_axes([0.96,0,0.02,0.80])
+cbar=plt.colorbar(im, cax=axcolor)
+axcolor.tick_params(labelsize=10) 
+
+SaveDir = OutputFolder + '\\sorted co_occurrence matrix.png'
+plt.savefig(SaveDir) 
+plt.close()
+
+## plot binary sorted co-occurrence matrix (majority vote)
+# majority vote condition
+co_matrix_thre = 0.6
+co_matrix_sorted_small_thre3 = co_matrix_sorted_small/np.max(co_matrix_sorted_small)
+co_matrix_sorted_small_thre3[co_matrix_sorted_small_thre3<co_matrix_thre] = 0
+co_matrix_sorted_small_thre3[co_matrix_sorted_small_thre3>=co_matrix_thre] = 1
+
+### plot to visulize it
+fig=plt.figure(figsize=(10,10))
+
+# plot the heatmap
+axmatrix = fig.add_axes([0.10,0,0.80,0.80])
+im = axmatrix.matshow(co_matrix_sorted_small_thre3, aspect='auto', origin='lower', cmap=cm.YlGnBu, interpolation='none')
+fig.gca().invert_yaxis()
+
+# Plot colorbar
+axcolor = fig.add_axes([0.96,0,0.02,0.80])
+cbar=plt.colorbar(im, cax=axcolor)
+axcolor.tick_params(labelsize=10) 
+
+SaveDir = OutputFolder + '\\binary sorted co_occurrence matrix.png'
+plt.savefig(SaveDir) 
+plt.close()
+
+print('finishing plotting, next step: L3.0.6 update the ensemble results')
+
+#===========================================
+# L3.0.6 update the ensemble results
+#===========================================
+final_labels_HC = fcluster(Y, n_cluster, criterion = 'maxclust')-1
+
+# 5.2 orgaize the pixel labels
+final_labels = np.empty((NumLine*NumSpePerLine))
+
+# extend labels to entries in batches
+for i in range(elements.shape[0]):                            # lets loop along the batch (features' sequence) 
+    label = elements[i]                                       # batch label
+    final_label_HC = final_labels_HC[i]                      # labels for this batch given by HC
+    idx = np.where(labels == label)[0]                     # find out pixel locations in the batch
+    final_labels[idx] = final_label_HC                      # attach HC labels to GMM batch
+    #break
+
+df_pixel_label_ensemble['auto_assemble'] = final_labels
+SaveDir = OutputFolder + '\\pixel_ensemble_label2.csv'
+df_pixel_label_ensemble.to_csv(SaveDir, index=False, sep=',')
+print('auto finishing is updated, please check output results at: \n{}'.format(OutputFolder_final))

@@ -86,7 +86,7 @@ fig = plt.figure(figsize=(w_fig, h_fig))
 fig.subplots_adjust(hspace= 0, wspace=0.01, right=0.95)
 for i in range(1, img.shape[0]+1):
     ax = fig.add_subplot(nrows, ncols, i)
-    im = ax.imshow(img[i-1], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19)
+    im = ax.imshow(img[i-1], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19, interpolation='none')
     ax.set_xticks([])
     ax.set_yticks([])
     

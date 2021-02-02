@@ -18,7 +18,7 @@ if MassList_FileDir != 0:
 print('Finish pixel raw data import')
 
 #===========================================
-# L2.0 data processing
+# L2.0.0 data processing
 #===========================================
 # parse info
 NumLine = int(np.max(df_pixel[0]) + 1)
@@ -37,10 +37,10 @@ OutputFolder = locate_OutputFolder2(L0outputDir)
 OutputFolder = locate_OutputFolder3(OutputFolder, 'univariate thresholding')
 os.mkdir(OutputFolder)
 
-print('Finish L2.0 data processing, next step: thresholding')
+print('Finish L2.0.0 data processing, next step: thresholding')
 
 #===========================================
-# L2.1 thresholding
+# L2.0.1 thresholding
 #===========================================
 # accumulator 
 img_thresholds = np.empty([n_classes-1, 0])
@@ -63,10 +63,10 @@ df_img_segs_flatten.insert(0, 'line_index', df_pixel[0])
 SaveDir = OutputFolder + '\\pixel_label.csv'
 df_img_segs_flatten.to_csv(SaveDir, index=False, sep=',')
 
-print('Finish L2.1 thresholding, next step: plotting thresholding reuslts')
+print('Finish L2.0.1 thresholding, next step: plotting thresholding reuslts')
 
 #===========================================
-# L2.2 plots and save
+# L2.0.2 plots and save
 #===========================================
 # like mosaic img show
 # parameters:
@@ -82,7 +82,7 @@ for i in range(1, ncols*len(index)+1):
     ax = fig.add_subplot(nrows, ncols, i)                # start subplotting
     
     if i%3 == 1: # column 1, utilizing period nature of this subplot
-        im = ax.imshow(img[index[k]+2], cmap=colormap, aspect=aspect)
+        im = ax.imshow(img[index[k]+2], cmap=colormap, aspect=aspect, interpolation='none')
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(str(index[k]) + '_ion image', pad=8, fontsize = 15)
@@ -102,24 +102,24 @@ for i in range(1, ncols*len(index)+1):
         ax.set_title(str(index[k]) + '_ion image histogram', pad=8, fontsize = 15)
         
     if i%3 == 0: # column 3, utilizing period nature of this subplot
-        im_seg = ax.imshow(img_segs[k], cmap=colormap_thresholding, aspect=aspect,vmin = 0, vmax=11)
+        im_seg = ax.imshow(img_segs[k], cmap=colormap_thresholding, aspect=aspect,vmin = 0, vmax=11, interpolation='none')
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(str(index[k]) + '_ion image segments', pad=8, fontsize = 15) 
 # color bar
 cbar_ax = fig.add_axes([0.96,0.1,0.01,0.8])
 cbar = fig.colorbar(im_seg, cax=cbar_ax, ticks=[0.5,1.4,2.3,3.2,4.1,5,5.9,6.85,7.8,8.7,9.6,10.5, 11.4])
-cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11]) #hard code 
+cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11,12]) #hard code 
 cbar.ax.tick_params(labelsize=15)
 
 SaveDir = OutputFolder + '\\univariate thresholding analysis.png'
 plt.savefig(SaveDir, dpi=dpi)
 plt.close()
 
-print('Finish L2.2 plotting, next step: interactive visualization')
+print('Finish L2.0.2 plotting, next step: interactive visualization')
 
 #===========================================
-# L2.2 interactive visualization
+# L2.0.2 interactive visualization
 #===========================================
 # omit some parameter defines 
 w_fig = 20 # default
@@ -141,7 +141,7 @@ for i in range(1, ncols*len(index)+1):
     ax = fig.add_subplot(nrows, ncols, i)                # start subplotting
     
     if i%3 == 1: # column 1, utilizing period nature of this subplot
-        im = ax.imshow(img[index[k]+2], cmap=colormap, aspect=aspect)
+        im = ax.imshow(img[index[k]+2], cmap=colormap, aspect=aspect, interpolation='none')
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(str(index[k]) + '_ion image', pad=5, fontsize = 10)
@@ -162,14 +162,14 @@ for i in range(1, ncols*len(index)+1):
         ax.set_title(str(index[k]) + '_ion image histogram', pad=5, fontsize = 10)
         
     if i%3 == 0: # column 3, utilizing period nature of this subplot
-        im_seg = ax.imshow(img_segs[k], cmap=colormap_thresholding, aspect=aspect,vmin = 0, vmax=11)
+        im_seg = ax.imshow(img_segs[k], cmap=colormap_thresholding, aspect=aspect,vmin = 0, vmax=11, interpolation='none')
         ax.set_xticks([])
         ax.set_yticks([])
         ax.set_title(str(index[k]) + '_ion image segments', pad=5, fontsize = 10) 
 # color bar
 cbar_ax = fig.add_axes([0.96,0.1,0.01,0.8])
 cbar = fig.colorbar(im_seg, cax=cbar_ax, ticks=[0.5,1.4,2.3,3.2,4.1,5,5.9,6.85,7.8,8.7,9.6,10.5, 11.4])
-cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11]) #hard code 
+cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11,12]) #hard code 
 cbar.ax.tick_params(labelsize=15)
 
 # scrollbars

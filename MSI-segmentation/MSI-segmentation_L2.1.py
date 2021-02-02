@@ -16,7 +16,7 @@ df_pixel_label_clustering = pd.read_csv(L1outputDir)
 print('Finish pixel raw data import')
 
 #===========================================
-# L2.3 data preprocess
+# L2.1.0 data preprocess
 #===========================================
 # parse info
 NumLine = int(np.max(df_pixel_label_thresholding['line_index']) + 1)
@@ -26,7 +26,7 @@ NumSpePerLine = int(np.max(df_pixel_label_thresholding['spectrum_index']) + 1)
 aspect = AspectRatio*NumSpePerLine/NumLine
 
 # data organization
-pixel_label_thresholding = df_pixel_label_thresholding.values.astype(np.int)
+pixel_label_thresholding = df_pixel_label_thresholding.values.astype(np.int32)
 img = pixel_label_thresholding.T.reshape(pixel_label_thresholding.shape[1], NumLine, NumSpePerLine)
 columns = df_pixel_label_thresholding.columns.values
 keys = list(selection_thre.keys())
@@ -38,10 +38,10 @@ OutputFolder = locate_OutputFolder2(L2outputDir)
 OutputFolder_final = locate_OutputFolder3(OutputFolder, 'ensemble results')
 os.mkdir(OutputFolder_final)
 
-print('Finish L2.3 data processing, next step: select segments and despike')
+print('Finish L2.1.0 data processing, next step: select segments and despike')
 
 #===========================================
-# L2.3 select (merge) segments and despike
+# L2.1.1 select (merge) segments and despike
 #===========================================
 img_binary_segs = np.empty([0, NumLine, NumSpePerLine])
 
@@ -56,10 +56,10 @@ for i in keys:
     img_binary_segs = np.append(img_binary_segs, img_work_despike.reshape(1, NumLine, NumSpePerLine), axis=0)
     print('{}/{} img is done'.format(i, keys))
     
-print('Finish L2.3 image processing, binary segments are ready')
+print('Finish L2.1.1 image processing, binary segments are ready')
 
 #===========================================
-# L2.3 plot and save
+# L2.1.2 plot and save
 #===========================================
 # parameters for plt.plot:
 w_fig = 10 # default setting
@@ -81,7 +81,7 @@ for i in range(img_binary_segs.shape[0]):
 # colorbar
 cbar_ax = fig.add_axes([0.96,0.1,0.01,0.8])
 cbar = fig.colorbar(im, cax=cbar_ax, ticks=[0.5,1.4,2.3,3.2,4.1,5,5.9,6.85,7.8,8.7,9.6,10.5, 11.4])
-cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11]) #hard code 
+cbar.ax.set_yticklabels([0,1,2,3,4,5,6,7,8,9,10,11, 12]) #hard code 
 cbar.ax.tick_params(labelsize=10)
 
 # save
@@ -89,10 +89,10 @@ SaveDir = OutputFolder_thresholding + '\\univariate thresholding results.png'
 plt.savefig(SaveDir, dpi=dpi)
 plt.close()
 
-print('L2.3 plotting is done, please check output results at: \n{}'.format(OutputFolder_thresholding))
+print('L2.1.2 plotting is done, please check output results at: \n{}'.format(OutputFolder_thresholding))
 
 #===========================================
-# L2.3 conbine results with multivariate clustering and save .csv file
+# L2.1.3 conbine results with multivariate clustering and save .csv file
 #===========================================
 # flatten the data
 pixel_thresholding_binary_labels = img_binary_segs.reshape(img_binary_segs.shape[0], -1).T

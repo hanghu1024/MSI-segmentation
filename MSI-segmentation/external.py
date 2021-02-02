@@ -20,10 +20,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
 import mplcursors
 
+from scipy import sparse
+import scipy.cluster.hierarchy as sch
+from scipy.cluster.hierarchy import fcluster
+
 from sklearn.preprocessing import StandardScaler as SS
 from sklearn.decomposition import PCA
+from sklearn.decomposition import TruncatedSVD
 from sklearn.mixture import GaussianMixture as GMM
+
 import umap
+import hdbscan
 
 from skimage.filters import threshold_multiotsu
 

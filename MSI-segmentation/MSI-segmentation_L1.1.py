@@ -8,14 +8,14 @@ exec(open("./config.py").read())
 print('Finish modules, defs and variables import')
 
 #===========================================
-# L1.3 import data 
+# L1.1 import data 
 #===========================================
 df_pixel_label = pd.read_csv(L1outputDir)
 
 print('Finish pixel raw data import')
 
 #===========================================
-# L1.3 data process
+# L1.1 data process
 #===========================================
 pixel_label = df_pixel_label.values
 
@@ -32,7 +32,7 @@ img = pixel_label.T.reshape(pixel_label.shape[1], NumLine, NumSpePerLine)
 print('Finish L1.3 data process')
 
 #===========================================
-# L1.3 ensemble results in mosaic plot, embed in tk.
+# L1.1 ensemble results in mosaic plot, embed in tk.
 #===========================================
 # mosaic img show
 # parameters for plt.plot:
@@ -54,7 +54,7 @@ fig = mtl.figure.Figure(figsize=(w_fig, h_fig))
 fig.subplots_adjust(hspace= 0, wspace=0.01, right=0.95)
 for i in range(img.shape[0]-2):
     ax = fig.add_subplot(nrows, ncols, i+1)
-    im = ax.imshow(img[i+2], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19)
+    im = ax.imshow(img[i+2], cmap=cm.tab20, aspect = aspect, vmin=0,vmax=19, interpolation='none')
     ax.set_xticks([])
     ax.set_yticks([])
     
