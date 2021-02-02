@@ -47,7 +47,7 @@ Multivariate clustering by Gaussian mixture model.
 *MSI-segmentation_L1.1.py (validation)*<br>
 Show clustering results by interactive tkinter interface. 
 
-MSI-segmentation_L1.2.py*<br>
+*MSI-segmentation_L1.2.py*<br>
 Detect ion images which are not captured by PCA analysis. A ward's hierarchical clustering method is used to cluster ion distribution patterns.
 
 *MSI-segmentation_L2.0.py*<br>
