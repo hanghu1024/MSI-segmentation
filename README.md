@@ -2,7 +2,7 @@
 
 It is a data processing pipeline for mass spectrometry imaging (MSI) segmentation by combining multivariate clustering and univariate thresholding. 
 
-The pipeline comprises four independent data processing modules, as illustrated as follows. First, we perform data preprocessing (not included in this repository), in which line scan alignment, peak picking, normalization, and ion image visualization are performed to organize MSI data for downstream data mining. Next, pixels are clustered based on their spectral similarity in multivariate analysis. In particular, both PCA and UMAP are applied: the former generates compressed features for GMM clustering, while the latter helps estimate the number of clusters. Given these inputs, GMM is repeatedly fitted, assigned with a range (5) of mixture component numbers around UMAP estimation. In parallel, ion images that are poorly represented in multivariate analysis are independently partitioned using multi-Otsu thresholding. As a result, ensemble generation of both multivariate and univariate analyses approximates a pool of spatial segment candidates. Finally, we assemble the segmentation map. 
+The pipeline comprises four independent data processing modules, as illustrated as follows. First, we perform data preprocessing (not included in this repository), in which peak picking, peak detection + m/z binning, pixel alignment, peak intensity normalization are performed to organize MSI data for downstream data mining. Next, pixels are clustered based on their spectral similarity in multivariate analysis. In particular, both PCA and UMAP are applied: the former generates compressed features for GMM clustering, while the latter helps estimate the number of clusters. Given these inputs, GMM is repeatedly fitted, assigned with a range (5) of mixture component numbers around UMAP estimation. In parallel, ion images that are poorly represented in multivariate analysis are detected and independently partitioned using multi-Otsu thresholding. As a result, ensemble generation of both multivariate and univariate analyses approximates a pool of spatial segment candidates. Finally, we assemble the segmentation map. 
 
 <div align="center">
 <img src="images/image1.png" width="400">
@@ -57,7 +57,7 @@ Univariate thresholding by multi-Otsu thresholding algorithm.
 Binarization of selected ion images with selected thresholding labels. 
 
 *MSI-segmentation_L3.0.py*<br>
-Auto-finish the clustering analysis with a co-occurrence majority vote method. Compuation could be expensive for large size MSI data.
+Automatically assemble the clustering analysis with a co-occurrence majority vote method. Compuation could be expensive for large size MSI data.
 
 *MSI-segmentation_L3.1.py (validation)*<br>
 Show ensemble segment candidates by interactive tkinter interface. 
