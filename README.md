@@ -1,6 +1,6 @@
 # MSI-segmentation
 
-It is a data processing pipeline for mass spectrometry imaging (MSI) segmentation by combining multivariate clustering and univariate thresholding. 
+It is an unsupervised data processing pipeline for mass spectrometry imaging (MSI) segmentation by combining multivariate clustering and univariate thresholding. 
 
 The pipeline comprises four independent data processing modules, as illustrated as follows. First, we perform data preprocessing (not included in this repository), in which peak picking, peak detection + m/z binning, pixel alignment, peak intensity normalization are performed to organize MSI data for downstream data mining. Next, pixels are clustered based on their spectral similarity in multivariate analysis. In particular, both PCA and UMAP are applied: the former generates compressed features for GMM clustering, while the latter helps estimate the number of clusters. Given these inputs, GMM is repeatedly fitted, assigned with a range (5) of mixture component numbers around UMAP estimation. In parallel, ion images that are poorly represented in multivariate analysis are detected and independently partitioned using multi-Otsu thresholding. As a result, ensemble generation of both multivariate and univariate analyses approximates a pool of spatial segment candidates. Finally, we assemble the segmentation map. 
 
@@ -65,4 +65,5 @@ Show ensemble segment candidates by interactive tkinter interface.
 *MSI-segmentation_L3.2.py (selection)*<br>
 Simplify the auto-assembled segmentation map or manually assemble the final segmentation map.
 
-
+# Reference
+Hang Hu, Ruichuan Yin, Hilary M. Brown, and Julia Laskin, Spatial Segmentation of Mass Spectrometry Imaging Data by Combining Multivariate Clustering and Univariate Thresholding, Anal. Chem. 2021. https://pubs.acs.org/doi/full/10.1021/acs.analchem.0c04798
